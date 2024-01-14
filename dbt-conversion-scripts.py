@@ -530,10 +530,12 @@ def convertSourcesToRefs(filename: str, sources: list[str]):
 
 
 def addIncrementalLine(filename: str):
-    fromStr = "-- this filter will only be applied on an incremental run"
-    toStr = """-- this filter will only be applied on an incremental run
-        where/and recordstamp/DICE_CHANGE_SOURCE_WATERMARK > '{{ min_max_cdc_timestamp.min }}' and recordstamp/DICE_CHANGE_SOURCE_WATERMARK <= '{{min_max_cdc_timestamp.max}}'
+    fromStr = """-- this filter will only be applied on an incremental run
 """
+    toStr = """-- this filter will only be applied on an incremental run
+        where -- and
+        recordstamp > '{{ min_max_cdc_timestamp.min }}' and recordstamp <= '{{min_max_cdc_timestamp.max}}'
+        -- DICE_CHANGE_SOURCE_WATERMARK > '{{ min_max_cdc_timestamp.min }}' and DICE_CHANGE_SOURCE_WATERMARK <= '{{min_max_cdc_timestamp.max}}'"""
     sqlData = readFile(filename)
     sqlData = sqlData.replace(fromStr, toStr)
     writeToFile(filename, sqlData)
@@ -542,8 +544,8 @@ def addIncrementalLine(filename: str):
 def addCdcColumns(filename: str):
     fromStr = "current_timestamp() as metadata_inserted_timestamp"
     toStr = """cdc_operation_type -- operation_flag/DICE_CHANGE_INDICATOR       as cdc_operation_type
-    ,       cdc_timestamp      -- recordstamp/DICE_CHANGE_SOURCE_WATERMARK   as cdc_timestamp
-    ,       current_timestamp() as metadata_inserted_timestamp"""
+    ,     cdc_timestamp      -- recordstamp/DICE_CHANGE_SOURCE_WATERMARK   as cdc_timestamp
+    ,     current_timestamp() as metadata_inserted_timestamp"""
     sqlData = readFile(filename)
     sqlData = sqlData.replace(fromStr, toStr)
     writeToFile(filename, sqlData)
