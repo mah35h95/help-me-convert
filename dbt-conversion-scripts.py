@@ -385,6 +385,7 @@ QUALIFY ROW_NUMBER() OVER (PARTITION BY <TODO: ADD Primary Keys> ORDER BY DICE_C
 
 
 def addNewLineToIngestSQLFile(ref: str):
+    print(f"Adding new line to Ingest Stage {ref}")
     folderPath = f"{datT}/models/raw/hana_s4_ppf"
     filename = f"{folderPath}/{ref}_current_v1.sql"
 
@@ -422,6 +423,7 @@ def createIngestRefFiles(ref: str, filename: str, name: str, tableKeys: str):
 
 
 def addNewLineToDatalakeSQLFile(ref: str):
+    print(f"Adding new line to Datalake {ref}")
     folderPath = f"{datT}/models/raw/dice_sources"
     filename = f"{folderPath}/{ref}_current_v1.sql"
 
