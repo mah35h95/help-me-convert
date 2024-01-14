@@ -1,12 +1,6 @@
 import yaml
 import random
-
-
-def findInListOfDict(list, key, value):
-    for i, dic in enumerate(list):
-        if dic[key] == value:
-            return i
-    return -1
+import re
 
 
 def readFile(filename: str) -> str:
@@ -15,50 +9,55 @@ def readFile(filename: str) -> str:
     return data
 
 
-def writeFile(filename: str, fileData: str):
+def writeToFile(filename: str, fileData: str):
     with open(filename, "w") as f:
         f.write(fileData)
 
 
-filePath = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations/models/raw/_sources/_ingest_stage_sources.yml"
-name = ("ingest_stage_hana_s4_ppf",)
-ref = "knvp"
-
-with open(filePath) as file:
-    sourcesList = yaml.load(file, Loader=yaml.FullLoader)
+def readYMLFile(filename: str):
+    with open(filename) as f:
+        data = yaml.load(f, Loader=yaml.FullLoader)
+    return data
 
 
-sourceIndex = findInListOfDict(
-    sourcesList["sources"], "name", "ingest_stage_hana_s4_ppf"
-)
+def getRandomPosition(listLength: int) -> int:
+    randIndex = 0
+    if listLength - 1 > 0:
+        randIndex = random.randrange(0, listLength - 1)
+    elif listLength == 1:
+        randIndex = 1
+    return randIndex
 
-tableIndex = findInListOfDict(
-    sourcesList["sources"][sourceIndex]["tables"], "name", ref
-)
 
-if tableIndex == -1:
-    newTable = {"name": ref}
+def insertStr(data: str, strToInsert: str, index: int) -> str:
+    return data[:index] + strToInsert + data[index:]
 
-    sourcesList["sources"][sourceIndex]["tables"].insert(
-        random.randrange(0, len(sourcesList["sources"][sourceIndex]["tables"]) - 1),
-        newTable.copy(),
-    )
-    with open(filePath, "w") as file:
-        sourcesListUpdated = yaml.dump(sourcesList, file, sort_keys=False, indent=4)
-    fileData = readFile(filePath)
-    fileData = (
-        fileData.replace("version: 2", "version: 2\n")
-        .replace("-  ", "  -")
-        .replace(
-            """freshness:
-        warn_after:
-            count: 30
-            period: minute""",
-            """freshness: # default freshness
-      warn_after: { count: 30, period: minute }
-      #error_after: {count: 8, period: hour}""",
-        )
-    )
-    writeFile(filePath, fileData)
-else:
-    print("table exists")
+
+filename = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations/models/raw/dice_sources/_models.yml"
+ref = "customer_account_group_record_type_xref"
+
+columnName = "some, here, yes"
+unique_column_name = columnName.replace(", ", " || '-' || ")
+tableName = f"{ref}_current"
+newModel = f"""- name: {tableName}
+    latest_version: 1
+    versions:
+      - v: 1
+    tests:
+      - unique:
+          column_name: "{unique_column_name}"
+  """
+
+modelFile = readYMLFile(filename)
+randPos = getRandomPosition(len(modelFile["models"]))
+nameRandPos = modelFile["models"][randPos]["name"]
+
+searchName = f"- name: {nameRandPos}"
+
+ymlData = readFile(filename)
+
+searchMatches = re.finditer(searchName, ymlData)
+for searchMatch in searchMatches:
+    ymlData = insertStr(ymlData, newModel, searchMatch.start())
+
+writeToFile(filename, ymlData)

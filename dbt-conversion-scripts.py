@@ -234,6 +234,10 @@ def addNewTableToSourceYML(
     writeToFile(filename, ymlData)
 
 
+def insertStringAtIndex(data: str, stringToInsert: str, index: int) -> str:
+    return data[:index] + stringToInsert + data[index:]
+
+
 def addNewTableToModelYML(folderPath: str, tableName: str, columnName: str):
     filename = f"{folderPath}/_models.yml"
 
@@ -241,25 +245,28 @@ def addNewTableToModelYML(folderPath: str, tableName: str, columnName: str):
     if columnName == "":
         unique_column_name = "<TODO: ADD Primary Keys>"
     else:
-        unique_column_name = '"' + columnName.replace(", ", " || '-' || ") + '"'
+        unique_column_name = columnName.replace(", ", " || '-' || ")
 
-    newModel = {
-        "name": tableName,
-        "latest_version": 1,
-        "versions": [{"v": 1}],
-        "tests": [{"unique": {"column_name": unique_column_name}}],
-    }
+    newModel = f"""- name: {tableName}
+    latest_version: 1
+    versions:
+      - v: 1
+    tests:
+      - unique:
+          column_name: "{unique_column_name}"
+  """
+
     modelFile = readYMLFile(filename)
+    randPos = getRandomPosition(len(modelFile["models"]))
+    nameRandPos = modelFile["models"][randPos]["name"]
 
-    modelFile["models"].insert(
-        getRandomPosition(len(modelFile["models"])), newModel.copy()
-    )
-
-    with open(filename, "w") as f:
-        yaml.dump(modelFile, f, sort_keys=False, indent=4)
-
+    searchName = f"- name: {nameRandPos}"
     ymlData = readFile(filename)
-    ymlData = ymlData.replace("version: 2", "version: 2\n").replace("-  ", "  -")
+    searchMatches = re.finditer(searchName, ymlData)
+
+    for searchMatch in searchMatches:
+        ymlData = insertStringAtIndex(ymlData, newModel, searchMatch.start())
+
     writeToFile(filename, ymlData)
 
 
