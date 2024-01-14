@@ -384,6 +384,16 @@ QUALIFY ROW_NUMBER() OVER (PARTITION BY <TODO: ADD Primary Keys> ORDER BY DICE_C
     writeToFile(filename, sqlData)
 
 
+def addNewLineToIngestSQLFile(ref: str):
+    folderPath = f"{datT}/models/raw/hana_s4_ppf"
+    filename = f"{folderPath}/{ref}_current_v1.sql"
+
+    sqlData = readFile(filename)
+    sqlData = f"{sqlData}\n\n"
+
+    writeToFile(filename, sqlData)
+
+
 def createIngestRefFiles(ref: str, filename: str, name: str, tableKeys: str):
     print(f"Creating {ref} Ingest Stage Ref Files")
     folderPath = f"{datT}/models/raw/hana_s4_ppf"
@@ -409,6 +419,16 @@ def createIngestRefFiles(ref: str, filename: str, name: str, tableKeys: str):
     tableName = f"{ref}_current"
     addNewTableToModelYML(folderPath, tableName, tableKeys)
     createIngestSQLFiles(folderPath, ref, tableKeys)
+
+
+def addNewLineToDatalakeSQLFile(ref: str):
+    folderPath = f"{datT}/models/raw/dice_sources"
+    filename = f"{folderPath}/{ref}_current_v1.sql"
+
+    sqlData = readFile(filename)
+    sqlData = f"{sqlData}\n\n"
+
+    writeToFile(filename, sqlData)
 
 
 def createDatalakeRefFiles(
@@ -502,6 +522,7 @@ def createRefFiles(refs: list[str]):
             if isIngestStageSource(ref):
                 if isTableInYML(filename, name, ref):
                     print(f"{ref} already exists")
+                    addNewLineToIngestSQLFile(ref)
                 else:
                     tableKeys = getTableKeys(ref)
                     createIngestRefFiles(ref, filename, name, tableKeys)
@@ -512,6 +533,7 @@ def createRefFiles(refs: list[str]):
                 if choice == "i":
                     if isTableInYML(filename, name, ref):
                         print(f"{ref} already exists")
+                        addNewLineToIngestSQLFile(ref)
                     else:
                         createIngestRefFiles(ref, filename, name, "")
                 else:
@@ -521,6 +543,7 @@ def createRefFiles(refs: list[str]):
                     name = schemaName
                     if isTableInYML(filename, name, changeHistName):
                         print(f"{changeHistName} already exists")
+                        addNewLineToDatalakeSQLFile(ref)
                     else:
                         createDatalakeRefFiles(ref, schemaName, filename, name, "")
 
@@ -538,6 +561,7 @@ def createSourceFiles(sources: list[str]):
         changeHistName = f"{ref}_change_hist"
         if isTableInYML(filename, name, changeHistName):
             print(f"{changeHistName} already exists")
+            addNewLineToDatalakeSQLFile(ref)
         else:
             createDatalakeRefFiles(ref, schemaName, filename, name, "")
 
@@ -730,9 +754,9 @@ git add .
 git commit -m "Adding in files for {table_name} {emojis}"
 
 """
-    print("Running type2 steps")
-    writeToFile(commandPath, command)
-    runScript()
+    # print("Running type2 steps")
+    # writeToFile(commandPath, command)
+    # runScript()
     print("Type2 script complete")
 
     print("Reading type2 stg file")
