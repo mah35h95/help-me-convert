@@ -756,9 +756,9 @@ git add .
 git commit -m "Adding in files for {table_name} {emojis}"
 
 """
-    # print("Running type2 steps")
-    # writeToFile(commandPath, command)
-    # runScript()
+    print("Running type2 steps")
+    writeToFile(commandPath, command)
+    runScript()
     print("Type2 script complete")
 
     print("Reading type2 stg file")
