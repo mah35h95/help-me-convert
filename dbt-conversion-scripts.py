@@ -605,44 +605,55 @@ def removeCdcTimestamp(filename: str):
 
 
 def do_type0(table_name: str, layer: str):
+    modelLayer = ""
+    if isStage(table_name):
+        modelLayer = "staging"
+    else:
+        modelLayer = "marts"
+
     command = f"""cd {datT}
 
 git checkout main
 git pull
 git checkout -b {userDomainName}-{table_name}
 
-"""
-    if isStage(table_name):
-        command = (
-            command
-            + f"""cd {datT}/models/staging/{layer}/ppf/
+cd {datT}/models/{modelLayer}/{layer}/ppf/
 mkdir {table_name}
-cp {datTr}/models/staging/{layer}/ppf/{table_name}/* ./{table_name}
+cp {datTr}/models/{modelLayer}/{layer}/ppf/{table_name}/* ./{table_name}
 
-"""
-        )
-    else:
-        command = (
-            command
-            + f"""cd {datT}/models/marts/{layer}/ppf/
-mkdir {table_name}
-cp {datTr}/models/marts/{layer}/ppf/{table_name}/* ./{table_name}
-
-"""
-        )
-    command = (
-        command
-        + f"""cd {datT}
+cd {datT}
 
 git add .
 git commit -m "Adding in files for {table_name} {emojis}"
 
 """
-    )
-    print("Running Type 0 steps")
+    print("Running type0 steps")
     writeToFile(commandPath, command)
     runScript()
-    print("Type 0 script complete")
+    print("Type0 script complete")
+
+    print("Reading type0 stg file")
+    fileZeroPath = (
+        f"{datT}/models/{modelLayer}/{layer}/ppf/{table_name}/{table_name}_v1.sql"
+    )
+    fileZero = readFile(fileZeroPath)
+
+    print("Pulling refs from type0 file")
+    refs = readBetweenTheLine(fileZero, "{{ ref(", ") }}")
+    createRefFiles(refs)
+
+    print("Pulling sources from type0 file")
+    sources = readBetweenTheLine(fileZero, "{{ source(", ") }}")
+    createSourceFiles(sources)
+    convertSourcesToRefs(fileZeroPath, sources)
+
+    addIncrementalLine(fileZeroPath)
+    addCdcColumns(fileZeroPath)
+
+    fileZeroModelPath = (
+        f"{datT}/models/{modelLayer}/{layer}/ppf/{table_name}/_models.yml"
+    )
+    addCdcOperationType(fileZeroModelPath)
 
 
 def do_type1(table_name: str, layer: str):
@@ -666,10 +677,32 @@ git add .
 git commit -m "Adding in files for {table_name} {emojis}"
 
 """
-    print("Running Type 1 steps")
+    print("Running type1 steps")
     writeToFile(commandPath, command)
     runScript()
-    print("Type 1 script complete")
+    print("Type1 script complete")
+
+    print("Reading type1 mart file")
+    martPath = f"{datT}/models/marts/{layer}/ppf/{table_name}/{table_name}_v1.sql"
+    martFile = readFile(martPath)
+
+    print("Pulling refs from type1 mart file")
+    refs = readBetweenTheLine(martFile, "{{ ref(", ") }}")
+    createRefFiles(refs)
+
+    print("Pulling sources from type1 mart file")
+    sources = readBetweenTheLine(martFile, "{{ source(", ") }}")
+    createSourceFiles(sources)
+    convertSourcesToRefs(martPath, sources)
+
+    addIncrementalLine(martPath)
+    addCdcColumns(martPath)
+
+    martModelPath = f"{datT}/models/marts/{layer}/ppf/{table_name}/_models.yml"
+    addCdcOperationType(martModelPath)
+
+    legacyModelPath = f"{datT}/models/marts/{layer}/ppf/legacy_{table_name}/_models.yml"
+    removeCdcTimestamp(legacyModelPath)
 
 
 def do_type2(table_name: str, layer: str):
@@ -697,13 +730,12 @@ git add .
 git commit -m "Adding in files for {table_name} {emojis}"
 
 """
-    # TODO: remove comments after test
-    # print("Running Type 2 steps")
-    # writeToFile(commandPath, command)
-    # runScript()
-    print("Type 2 script complete")
+    print("Running type2 steps")
+    writeToFile(commandPath, command)
+    runScript()
+    print("Type2 script complete")
 
-    print("Reading Type 2 stg file")
+    print("Reading type2 stg file")
     stgPath = (
         f"{datT}/models/staging/{layer}/ppf/stg_{table_name}/stg_{table_name}_v1.sql"
     )
