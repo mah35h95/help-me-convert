@@ -795,14 +795,17 @@ layer = getLayer(table_name)
 
 match type:
     case "type0":
-        print("Doing Type 0")
+        print("Doing Type0")
         do_type0(table_name, layer)
+        print("Type0 Done")
     case "type1":
-        print("Doing Type 1")
+        print("Doing Type1")
         do_type1(table_name, layer)
+        print("Type1 Done")
     case "type2":
-        print("Doing Type 2")
+        print("Doing Type2")
         do_type2(table_name, layer)
+        print("Type2 Done")
     case _:
         print(type)
         print("i don't know what to do")
