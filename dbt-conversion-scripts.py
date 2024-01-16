@@ -29,6 +29,7 @@ import yaml
 import random
 
 # Define Values
+table_name = ""
 datT = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations"
 datTr = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations-ref"
 commandPath = "/temp/command.sh"
