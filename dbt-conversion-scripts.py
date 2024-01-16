@@ -29,12 +29,11 @@ import yaml
 import random
 
 # Define Values
-table_name = "TABLE_NAME"
 datT = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations"
 datTr = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations-ref"
 commandPath = "/temp/command.sh"
 userDomainName = "gm"
-emojis = "🤺"
+emojis = ""
 
 
 # Function definitions
@@ -829,9 +828,11 @@ def doType(table_name: str, type: str, layer: str):
 
 
 # Processing start
-table_name = table_name.lower()
-print("Getting Type")
-type = getTableType(table_name)
-print("Getting Layer")
-layer = getLayer(table_name)
-doType(table_name, type, layer)
+while True:
+    table_name = input("Enter Table Name: ")
+    table_name = table_name.lower()
+    print("Getting Type")
+    type = getTableType(table_name)
+    print("Getting Layer")
+    layer = getLayer(table_name)
+    doType(table_name, type, layer)
