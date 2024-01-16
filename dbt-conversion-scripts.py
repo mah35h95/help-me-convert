@@ -98,7 +98,7 @@ def getLayerFromUser(table_name: str) -> str:
         f"""Enter Layer for {table_name}:
 h - hub (default value)
 a - analytics
-"""
+Layer: """
     )
     match choice:
         case "h":
@@ -115,7 +115,7 @@ def getIngestLayerFromUser(table_name: str) -> str:
         f"""Enter Ingest Layer for {table_name}:
 i - ingest stage (default value)
 d - datalake
-"""
+Ingest Layer: """
     )
     match choice:
         case "i":
@@ -124,6 +124,29 @@ d - datalake
             return "d"
         case _:
             return "i"
+
+
+def getTableTypeFromUser(table_name: str, layer: str):
+    print(f"Getting {table_name}'s type from user")
+    choice = input(
+        f"""Enter Type for {table_name}:
+0 - type0
+1 - type1
+2 - type2
+Type: """
+    )
+    type = ""
+    match choice:
+        case "0":
+            type = "type0"
+        case "1":
+            type = "type1"
+        case "2":
+            type = "type2"
+        case _:
+            print("what input is this???")
+
+    doType(table_name, type, layer)
 
 
 def findInListOfDict(list, key: str, value: str) -> int:
@@ -786,26 +809,29 @@ git commit -m "Adding in files for {table_name} {emojis}"
     removeCdcTimestamp(legacyModelPath)
 
 
+def doType(table_name: str, type: str, layer: str):
+    match type:
+        case "type0":
+            print("Doing Type0")
+            do_type0(table_name, layer)
+            print("Type0 Done")
+        case "type1":
+            print("Doing Type1")
+            do_type1(table_name, layer)
+            print("Type1 Done")
+        case "type2":
+            print("Doing Type2")
+            do_type2(table_name, layer)
+            print("Type2 Done")
+        case _:
+            print(f"i don't know what to do...\nType: {type}")
+            getTableTypeFromUser(table_name, layer)
+
+
 # Processing start
 table_name = table_name.lower()
 print("Getting Type")
 type = getTableType(table_name)
 print("Getting Layer")
 layer = getLayer(table_name)
-
-match type:
-    case "type0":
-        print("Doing Type0")
-        do_type0(table_name, layer)
-        print("Type0 Done")
-    case "type1":
-        print("Doing Type1")
-        do_type1(table_name, layer)
-        print("Type1 Done")
-    case "type2":
-        print("Doing Type2")
-        do_type2(table_name, layer)
-        print("Type2 Done")
-    case _:
-        print(type)
-        print("i don't know what to do")
+doType(table_name, type, layer)
