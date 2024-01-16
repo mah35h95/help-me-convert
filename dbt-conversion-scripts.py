@@ -32,7 +32,7 @@ import random
 datT = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations"
 datTr = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations-ref"
 commandPath = "/temp/command.sh"
-userDomainName = "gm"
+userDomainName = "Your-Domain-Name"
 emojis = ""
 
 
