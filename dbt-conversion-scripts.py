@@ -33,7 +33,7 @@ datT = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformation
 datTr = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations-ref"
 commandPath = "/temp/command.sh"
 userDomainName = "Your-Domain-Name"
-emojis = ""
+emojis = "📁"
 
 
 # Function definitions
