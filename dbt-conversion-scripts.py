@@ -29,7 +29,7 @@ import yaml
 import random
 
 # Define Values
-table_name = "TXN_SALES_ORDER_OPEN_ORDER_PERFORMANCE"
+table_name = "TABLE_NAME"
 datT = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations"
 datTr = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations-ref"
 commandPath = "/temp/command.sh"
@@ -135,7 +135,7 @@ def getTableTypeFromUser(table_name: str, layer: str):
 2 - type2
 Type: """
     )
-    type = ""
+    type = "nan"
     match choice:
         case "0":
             type = "type0"
