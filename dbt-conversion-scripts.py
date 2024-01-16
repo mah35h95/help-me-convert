@@ -148,6 +148,16 @@ Type: """
     doType(table_name, type, layer)
 
 
+def collectRefs(ref: str):
+    dependantRefs = readFile("dependantRefs.txt")
+    dependantRefs = f"{dependantRefs}{ref}\n"
+    writeToFile("dependantRefs.txt", dependantRefs)
+
+
+def clearRefs():
+    writeToFile("dependantRefs.txt", "")
+
+
 def findInListOfDict(list, key: str, value: str) -> int:
     print(f"Finding index of {value} in dictionary")
     for i, dic in enumerate(list):
@@ -493,6 +503,7 @@ def createRefFiles(refs: list[str]):
 
         if isStage(ref) or isHub(ref) or isAnalytics(ref):
             print(f"No action needed for this ref: {ref}")
+            collectRefs(ref)
             '''
             # layer = getLayer(ref)
             # filename = f"{datT}/models/raw/_sources/_{layer}_sources.yml"
@@ -833,6 +844,7 @@ def doType(table_name: str, type: str, layer: str):
 # Processing start
 while True:
     table_name = input("Enter Table Name: ")
+    clearRefs()
     table_name = table_name.lower()
     print("Getting Type")
     type = getTableType(table_name)
