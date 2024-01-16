@@ -492,53 +492,56 @@ def createRefFiles(refs: list[str]):
         print(f"Validating refs files creation for {ref}")
 
         if isStage(ref) or isHub(ref) or isAnalytics(ref):
-            layer = getLayer(ref)
-            filename = f"{datT}/models/raw/_sources/_{layer}_sources.yml"
-            database = (
-                f"""'{{{{env_var("DBT_SOURCE_{layer.upper()}_GCP_PROJECT")}}}}'"""
-            )
-            warnCount = 24
-            warnPeriod = "hour"
-            errCount = 48
-            errPeriod = "hour"
-            loaded_at_field = f"metadata_{layer}_row_insert_timestamp"
+            print(f"No action needed for this ref: {ref}")
+            '''
+            # layer = getLayer(ref)
+            # filename = f"{datT}/models/raw/_sources/_{layer}_sources.yml"
+            # database = (
+            #     f"""'{{{{env_var("DBT_SOURCE_{layer.upper()}_GCP_PROJECT")}}}}'"""
+            # )
+            # warnCount = 24
+            # warnPeriod = "hour"
+            # errCount = 48
+            # errPeriod = "hour"
+            # loaded_at_field = f"metadata_{layer}_row_insert_timestamp"
 
-            if isStage(ref):
-                name = f"{layer}_stage"
-                schema = name
-                if isTableInYML(filename, name, ref):
-                    print(f"{ref} already exists")
-                else:
-                    addNewTableToSourceYML(
-                        ref,
-                        filename,
-                        name,
-                        database,
-                        schema,
-                        warnCount,
-                        warnPeriod,
-                        errCount,
-                        errPeriod,
-                        loaded_at_field,
-                    )
-            else:
-                name = layer
-                schema = name
-                if isTableInYML(filename, name, ref):
-                    print(f"{ref} already exists")
-                else:
-                    addNewTableToSourceYML(
-                        ref,
-                        filename,
-                        name,
-                        database,
-                        schema,
-                        warnCount,
-                        warnPeriod,
-                        errCount,
-                        errPeriod,
-                        loaded_at_field,
-                    )
+            # if isStage(ref):
+            #     name = f"{layer}_stage"
+            #     schema = name
+            #     if isTableInYML(filename, name, ref):
+            #         print(f"{ref} already exists")
+            #     else:
+            #         addNewTableToSourceYML(
+            #             ref,
+            #             filename,
+            #             name,
+            #             database,
+            #             schema,
+            #             warnCount,
+            #             warnPeriod,
+            #             errCount,
+            #             errPeriod,
+            #             loaded_at_field,
+            #         )
+            # else:
+            #     name = layer
+            #     schema = name
+            #     if isTableInYML(filename, name, ref):
+            #         print(f"{ref} already exists")
+            #     else:
+            #         addNewTableToSourceYML(
+            #             ref,
+            #             filename,
+            #             name,
+            #             database,
+            #             schema,
+            #             warnCount,
+            #             warnPeriod,
+            #             errCount,
+            #             errPeriod,
+            #             loaded_at_field,
+            #         )
+            '''
         else:
             ref = removeDiceTableSuffix(ref)
             filename = f"{datT}/models/raw/_sources/_ingest_stage_sources.yml"
@@ -546,7 +549,7 @@ def createRefFiles(refs: list[str]):
             if isIngestStageSource(ref):
                 if isTableInYML(filename, name, ref):
                     print(f"{ref} already exists")
-                    addNewLineToIngestSQLFile(ref)
+                    # addNewLineToIngestSQLFile(ref)
                 else:
                     tableKeys = getTableKeys(ref)
                     createIngestRefFiles(ref, filename, name, tableKeys)
@@ -557,7 +560,7 @@ def createRefFiles(refs: list[str]):
                 if choice == "i":
                     if isTableInYML(filename, name, ref):
                         print(f"{ref} already exists")
-                        addNewLineToIngestSQLFile(ref)
+                        # addNewLineToIngestSQLFile(ref)
                     else:
                         createIngestRefFiles(ref, filename, name, "")
                 else:
@@ -567,7 +570,7 @@ def createRefFiles(refs: list[str]):
                     name = schemaName
                     if isTableInYML(filename, name, changeHistName):
                         print(f"{changeHistName} already exists")
-                        addNewLineToDatalakeSQLFile(ref)
+                        # addNewLineToDatalakeSQLFile(ref)
                     else:
                         createDatalakeRefFiles(ref, schemaName, filename, name, "")
 
@@ -585,7 +588,7 @@ def createSourceFiles(sources: list[str]):
         changeHistName = f"{ref}_change_hist"
         if isTableInYML(filename, name, changeHistName):
             print(f"{changeHistName} already exists")
-            addNewLineToDatalakeSQLFile(ref)
+            # addNewLineToDatalakeSQLFile(ref)
         else:
             createDatalakeRefFiles(ref, schemaName, filename, name, "")
 
