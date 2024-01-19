@@ -38,6 +38,15 @@ emojis = "🌈📁"
 
 
 # Function definitions
+def getCheckoutStuff(table_name: str) -> str:
+    checkout_stuff = f"""
+git checkout main
+git pull
+git checkout -b {userDomainName}-{table_name}
+"""
+    return checkout_stuff
+
+
 def writeToFile(filename: str, content: str):
     print(f"Writing to {filename}")
     f = open(filename, "w", encoding="utf-8")
@@ -676,9 +685,7 @@ def do_type0(table_name: str, layer: str):
 
     command = f"""cd {datT}
 
-git checkout main
-git pull
-git checkout -b {userDomainName}-{table_name}
+{getCheckoutStuff(table_name)}
 
 cd {datT}/models/{modelLayer}/{layer}/ppf/
 mkdir {table_name}
@@ -722,9 +729,7 @@ git commit -m "Adding in files for {table_name} {emojis}"
 def do_type1(table_name: str, layer: str):
     command = f"""cd {datT}
 
-git checkout main
-git pull
-git checkout -b {userDomainName}-{table_name}
+{getCheckoutStuff(table_name)}
 
 cd {datT}/models/marts/{layer}/ppf/
 
@@ -771,9 +776,7 @@ git commit -m "Adding in files for {table_name} {emojis}"
 def do_type2(table_name: str, layer: str):
     command = f"""cd {datT}
 
-git checkout main
-git pull
-git checkout -b {userDomainName}-{table_name}
+{getCheckoutStuff(table_name)}
 
 cd {datT}/models/staging/{layer}/ppf/
 mkdir stg_{table_name}
