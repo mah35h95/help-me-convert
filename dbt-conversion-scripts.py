@@ -32,7 +32,7 @@ import random
 table_name = ""
 datT = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations"
 datTr = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations-ref"
-commandPath = "/temp/command.sh"
+commandPath = "C:/Users/GM/Documents/local_dev/help-me-convert/temp/convert.sh"
 userDomainName = "Your-Domain-Name"
 emojis = "🌈📁"
 
