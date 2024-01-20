@@ -31,6 +31,7 @@ import random
 # Define Values
 table_name = ""
 datT = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations"
+fromBranch = "utf_baseline_fix"
 datTr = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations-ref"
 commandPath = "C:/Users/GM/Documents/local_dev/help-me-convert/temp/convert.sh"
 userDomainName = "Your-Domain-Name"
@@ -701,7 +702,10 @@ def do_type0(table_name: str, layer: str):
     else:
         modelLayer = "marts"
 
-    command = f"""cd {datT}
+    command = f"""cd {datTr}
+git checkout {fromBranch}
+
+cd {datT}
 
 {getCheckoutStuff(table_name)}
 
@@ -745,7 +749,10 @@ git commit -m "Adding in files for {table_name} {emojis}"
 
 
 def do_type1(table_name: str, layer: str):
-    command = f"""cd {datT}
+    command = f"""cd {datTr}
+git checkout {fromBranch}
+
+cd {datT}
 
 {getCheckoutStuff(table_name)}
 
@@ -792,7 +799,10 @@ git commit -m "Adding in files for {table_name} {emojis}"
 
 
 def do_type2(table_name: str, layer: str):
-    command = f"""cd {datT}
+    command = f"""cd {datTr}
+git checkout {fromBranch}
+
+cd {datT}
 
 {getCheckoutStuff(table_name)}
 
