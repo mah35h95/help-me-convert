@@ -676,6 +676,24 @@ def removeCdcTimestamp(filename: str):
     writeToFile(filename, ymlData)
 
 
+def addMetaTimestamp(filename: str):
+    modelData = readYMLFile(filename)
+    columnName = modelData["models"][0]["tests"][0]["unique"]["column_name"]
+    fromStr = f"""tests:
+      - unique:
+          column_name: "{columnName}"
+    """
+    toStr = f"""tests:
+      - unique:
+          column_name: "{columnName} || '-' || metadata_hub_begin_timestamp || '-' || metadata_hub_end_timestamp"
+      - not_null:
+          column_name: "{columnName} || '-' || metadata_hub_begin_timestamp"
+    """
+    ymlData = readFile(filename)
+    ymlData = ymlData.replace(fromStr, toStr)
+    writeToFile(filename, ymlData)
+
+
 def do_type0(table_name: str, layer: str):
     modelLayer = ""
     if isStage(table_name):
@@ -824,6 +842,7 @@ git commit -m "Adding in files for {table_name} {emojis}"
 
     legacyModelPath = f"{datT}/models/marts/{layer}/ppf/legacy_{table_name}/_models.yml"
     removeCdcTimestamp(legacyModelPath)
+    addMetaTimestamp(legacyModelPath)
 
 
 def doType(table_name: str, type: str, layer: str):
