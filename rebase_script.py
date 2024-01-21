@@ -7,18 +7,18 @@ import random
 # Common file paths
 ingestSourcesPath = "models/raw/_sources/_ingest_stage_sources.yml"
 lakeSourcesPath = "models/raw/_sources/_lake_sources.yml"
-hanaModelsPath = "models/raw/hana_s4_ppf/_models.yml"
 diceModelsPath = "models/raw/dice_sources/_models.yml"
+hanaModelsPath = "models/raw/hana_s4_ppf/_models.yml"
 
 # Define Values
 baseCommitHash = ""
 fromBranch = ""
 toBranchSuffix = ""
+userDomainName = "Your-Domain-Name"
 datT = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations"
 datTr = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations-ref"
 commandPath = "C:/Users/GM/Documents/local_dev/help-me-convert/temp/rebase.sh"
 fileListPath = "C:/Users/GM/Documents/local_dev/help-me-convert/temp/fileList.txt"
-userDomainName = "gm"
 
 
 # Function definitions
@@ -320,18 +320,22 @@ def copyLakeChanges():
 
 
 # Processing start
-runDIffFileScript()
-print("Getting file diffs")
-pathsList = getDiffFilesList()
-ingestExist = isIngestPathIncluded(pathsList)
-lakeExist = isLakePathIncluded(pathsList)
-print("Copying files over")
-filesToCopy = getFileToCopy(pathsList)
-copyFilesOver(filesToCopy)
-if ingestExist:
-    print("Copying Ingest Changes over")
-    copyIngestChanges()
-if lakeExist:
-    print("Copying Datalake Changes over")
-    copyLakeChanges()
-print("Rebasing changes done")
+while True:
+    baseCommitHash = input("Enter Base Commit Hash: ")
+    fromBranch = input("Enter from Branch: ")
+    toBranchSuffix = input("Enter to Branch Suffix: ")
+    print("Getting file diffs")
+    runDIffFileScript()
+    pathsList = getDiffFilesList()
+    ingestExist = isIngestPathIncluded(pathsList)
+    lakeExist = isLakePathIncluded(pathsList)
+    print("Copying files over")
+    filesToCopy = getFileToCopy(pathsList)
+    copyFilesOver(filesToCopy)
+    if ingestExist:
+        print("Copying Ingest Changes over")
+        copyIngestChanges()
+    if lakeExist:
+        print("Copying Datalake Changes over")
+        copyLakeChanges()
+    print(f"Rebasing {fromBranch} changes done")

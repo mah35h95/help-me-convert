@@ -30,12 +30,12 @@ import random
 
 # Define Values
 table_name = ""
-datT = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations"
-fromBranch = "utf_baseline_fix"
-datTr = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations-ref"
-commandPath = "C:/Users/GM/Documents/local_dev/help-me-convert/temp/convert.sh"
 userDomainName = "Your-Domain-Name"
 emojis = "🌈📁"
+fromBranch = "utf_baseline_fix"
+datT = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations"
+datTr = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations-ref"
+commandPath = "C:/Users/GM/Documents/local_dev/help-me-convert/temp/convert.sh"
 
 
 # Function definitions
@@ -774,4 +774,4 @@ while True:
     print("Getting Layer")
     layer = getLayer(table_name)
     doType(table_name, type, layer)
-    print(f"{table_name} done")
+    print(f"Initial migration steps for {table_name} done")
