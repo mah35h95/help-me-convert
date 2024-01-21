@@ -244,12 +244,6 @@ def addNewTableToModelYML(folderPath: str, tableName: str, fromModelPath: str):
     writeToFile(filename, ymlData)
 
 
-# def copyRawSQLFiles(fileToCopy: str):
-#     pathsList = getDiffFilesList()
-#     filesToCopyList = getSelectedFileToCopy(pathsList, fileToCopy)
-#     copyFilesOver(filesToCopyList)
-
-
 def createIngestRefFiles(ref: str, filename: str, name: str):
     print(f"Creating {ref} Ingest Stage Ref Files")
     folderPath = f"{datT}/models/raw/hana_s4_ppf"
@@ -274,8 +268,6 @@ def createIngestRefFiles(ref: str, filename: str, name: str):
     )
     tableName = f"{ref}_current"
     addNewTableToModelYML(folderPath, tableName, hanaModelsPath)
-    # fileToCopy = f"models/raw/hana_s4_ppf/{ref}_current_v1.sql"
-    # copyRawSQLFiles(fileToCopy)
 
 
 def copyIngestChanges():
@@ -322,8 +314,6 @@ def createDatalakeRefFiles(ref: str, schemaName: str, filename: str, name: str):
         refClean = removeDiceTableSuffix(ref)
         tableName = f"{refClean}_current"
         addNewTableToModelYML(folderPath, tableName, diceModelsPath)
-        # fileToCopy = f"models/raw/dice_sources/{refClean}_current_v1.sql"
-        # copyRawSQLFiles(fileToCopy)
 
 
 def copyLakeChanges():
