@@ -26,7 +26,7 @@ def runDIffFileScript():
     command = f"""cd {datT}
 git checkout main
 git pull
-git checkout -b {userDomainName}-{toBranchSuffix}
+git checkout {userDomainName}-{toBranchSuffix} || git checkout -b {userDomainName}-{toBranchSuffix}
 
 cd {datTr}
 git checkout main

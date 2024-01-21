@@ -48,7 +48,7 @@ git checkout {fromBranch}
 cd {datT}
 git checkout main
 git pull
-git checkout -b {userDomainName}-{table_name}
+git checkout {userDomainName}-{table_name} || git checkout -b {userDomainName}-{table_name}
 """
     return checkout_stuff
 
