@@ -491,56 +491,6 @@ def createRefFiles(refs: list[str]):
 
         if isStage(ref) or isHub(ref) or isAnalytics(ref):
             collectRefs(ref)
-            '''
-            # No action needed for this ref
-            # layer = getLayer(ref)
-            # filename = f"{datT}/models/raw/_sources/_{layer}_sources.yml"
-            # database = (
-            #     f"""'{{{{env_var("DBT_SOURCE_{layer.upper()}_GCP_PROJECT")}}}}'"""
-            # )
-            # warnCount = 24
-            # warnPeriod = "hour"
-            # errCount = 48
-            # errPeriod = "hour"
-            # loaded_at_field = f"metadata_{layer}_row_insert_timestamp"
-
-            # if isStage(ref):
-            #     name = f"{layer}_stage"
-            #     schema = name
-            #     if isTableInYML(filename, name, ref):
-            #         print(f"{ref} already exists")
-            #     else:
-            #         addNewTableToSourceYML(
-            #             ref,
-            #             filename,
-            #             name,
-            #             database,
-            #             schema,
-            #             warnCount,
-            #             warnPeriod,
-            #             errCount,
-            #             errPeriod,
-            #             loaded_at_field,
-            #         )
-            # else:
-            #     name = layer
-            #     schema = name
-            #     if isTableInYML(filename, name, ref):
-            #         print(f"{ref} already exists")
-            #     else:
-            #         addNewTableToSourceYML(
-            #             ref,
-            #             filename,
-            #             name,
-            #             database,
-            #             schema,
-            #             warnCount,
-            #             warnPeriod,
-            #             errCount,
-            #             errPeriod,
-            #             loaded_at_field,
-            #         )
-            '''
         else:
             ref = removeDiceTableSuffix(ref)
             filename = f"{datT}/models/raw/_sources/_ingest_stage_sources.yml"
