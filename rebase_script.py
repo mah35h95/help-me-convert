@@ -35,14 +35,11 @@ git checkout {fromBranch}
 
 git diff {baseCommitHash} {fromBranch} --name-only > {fileListPath}
 """
-    print("Running diff scripts")
     writeToFile(commandPath, command)
     runScript()
-    print("Script complete")
 
 
 def writeToFile(filename: str, content: str):
-    print(f"Writing to {filename}")
     f = open(filename, "w", encoding="utf-8")
     if filename.__contains__(".sh"):
         f.write("#!/bin/bash\n")
@@ -55,14 +52,12 @@ def runScript():
 
 
 def readFile(filename: str) -> str:
-    print(f"Reading {filename} file")
     with open(filename) as f:
         data = f.read()
     return data
 
 
 def readYMLFile(filename: str):
-    print(f"Reading {filename} YML file")
     with open(filename) as f:
         data = yaml.load(f, Loader=yaml.FullLoader)
     return data
@@ -81,10 +76,8 @@ def copyFilesOver(filesToCopyList: list[str]):
             + f"""install -Dv {datTr}/{file} {datT}/{file}
 """
         )
-    print("Copying file over")
     writeToFile(commandPath, command)
     runScript()
-    print("Copy complete")
 
 
 def isIngestPathIncluded(pathsList: list[str]) -> bool:
@@ -123,7 +116,6 @@ def getSelectedFileToCopy(pathsList: list[str], fileToCopy: str) -> list[str]:
 
 
 def findInListOfDict(list, key: str, value: str) -> int:
-    print(f"Finding index of {value} in dictionary")
     for i, dic in enumerate(list):
         if dic[key] == value:
             return i
@@ -131,7 +123,6 @@ def findInListOfDict(list, key: str, value: str) -> int:
 
 
 def getRandomPosition(listLength: int) -> int:
-    print("Fetching random position")
     randIndex = 0
     if listLength - 1 > 0:
         randIndex = random.randrange(0, listLength - 1)
@@ -152,7 +143,6 @@ def addNewTableToSourceYML(
     errPeriod: str,
     loaded_at_field: str,
 ):
-    print(f"Adding {tableToAppend} to {filename}")
     newTable = {"name": tableToAppend}
     sourceFile = readYMLFile(filename)
     sourceIndex = findInListOfDict(sourceFile["sources"], "name", name)
@@ -195,7 +185,6 @@ def addNewTableToSourceYML(
 
 
 def isTableInYML(filename: str, name: str, ref: str) -> bool:
-    print(f"Checking if {ref} table exists in {filename}")
     sourceFile = readYMLFile(filename)
     sourceIndex = findInListOfDict(sourceFile["sources"], "name", name)
     if sourceIndex == -1:
@@ -207,12 +196,10 @@ def isTableInYML(filename: str, name: str, ref: str) -> bool:
 
 
 def insertStringAtIndex(data: str, stringToInsert: str, index: int) -> str:
-    print(f"Inserting string at {index}")
     return data[:index] + stringToInsert + data[index:]
 
 
 def addNewTableToModelYML(folderPath: str, tableName: str, fromModelPath: str):
-    print(f"Adding {tableName} to Model")
     filename = f"{folderPath}/_models.yml"
 
     fromModelYml = readYMLFile(f"{datTr}/{fromModelPath}")
@@ -250,7 +237,6 @@ def addNewTableToModelYML(folderPath: str, tableName: str, fromModelPath: str):
 
 
 def createIngestRefFiles(ref: str, filename: str, name: str):
-    print(f"Creating {ref} Ingest Stage Ref Files")
     folderPath = f"{datT}/models/raw/hana_s4_ppf"
     database = """'{{env_var("DBT_SOURCE_INGEST_STAGE_GCP_PROJECT")}}'"""
     schema = "S4HANA"
@@ -288,12 +274,10 @@ def copyIngestChanges():
 
 
 def removeDiceTableSuffix(name: str) -> str:
-    print(f"Removing DICE suffixes for {name}")
     return name.removesuffix("_current").removesuffix("_change_hist")
 
 
 def createDatalakeRefFiles(ref: str, schemaName: str, filename: str, name: str):
-    print(f"Creating {ref} Datalake Ref Files")
     folderPath = f"{datT}/models/raw/dice_sources"
     database = """'{{env_var("DBT_SOURCE_LAKE_GCP_PROJECT")}}'"""
     schema = schemaName
@@ -337,12 +321,17 @@ def copyLakeChanges():
 
 # Processing start
 runDIffFileScript()
+print("Getting file diffs")
 pathsList = getDiffFilesList()
 ingestExist = isIngestPathIncluded(pathsList)
 lakeExist = isLakePathIncluded(pathsList)
+print("Copying files over")
 filesToCopy = getFileToCopy(pathsList)
 copyFilesOver(filesToCopy)
 if ingestExist:
+    print("Copying Ingest Changes over")
     copyIngestChanges()
 if lakeExist:
+    print("Copying Datalake Changes over")
     copyLakeChanges()
+print("Rebasing changes done")
