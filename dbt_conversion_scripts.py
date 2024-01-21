@@ -40,7 +40,12 @@ emojis = "🌈📁"
 
 # Function definitions
 def getCheckoutStuff(table_name: str) -> str:
-    checkout_stuff = f"""
+    checkout_stuff = f"""cd {datTr}
+git checkout main
+git pull
+git checkout {fromBranch}
+
+cd {datT}
 git checkout main
 git pull
 git checkout -b {userDomainName}-{table_name}
@@ -702,12 +707,7 @@ def do_type0(table_name: str, layer: str):
     else:
         modelLayer = "marts"
 
-    command = f"""cd {datTr}
-git checkout {fromBranch}
-
-cd {datT}
-
-{getCheckoutStuff(table_name)}
+    command = f"""{getCheckoutStuff(table_name)}
 
 cd {datT}/models/{modelLayer}/{layer}/ppf/
 mkdir {table_name}
@@ -749,12 +749,7 @@ git commit -m "Adding in files for {table_name} {emojis}"
 
 
 def do_type1(table_name: str, layer: str):
-    command = f"""cd {datTr}
-git checkout {fromBranch}
-
-cd {datT}
-
-{getCheckoutStuff(table_name)}
+    command = f"""{getCheckoutStuff(table_name)}
 
 cd {datT}/models/marts/{layer}/ppf/
 
@@ -799,12 +794,7 @@ git commit -m "Adding in files for {table_name} {emojis}"
 
 
 def do_type2(table_name: str, layer: str):
-    command = f"""cd {datTr}
-git checkout {fromBranch}
-
-cd {datT}
-
-{getCheckoutStuff(table_name)}
+    command = f"""{getCheckoutStuff(table_name)}
 
 cd {datT}/models/staging/{layer}/ppf/
 mkdir stg_{table_name}

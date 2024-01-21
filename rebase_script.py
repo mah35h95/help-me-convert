@@ -4,25 +4,43 @@ import re
 import yaml
 import random
 
-# Define Values
-baseCommitHash = "4a7518cfbe72fd1589dd612ae3f2ee78996a759d"
-fromBranch = "gm-md_compensation_grade_profile"
-toBranchSuffix = "batch1"
-datT = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations"
-datTr = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations-ref"
-commandPath = "C:/Users/GM/Documents/local_dev/help-me-convert/temp/rebase.sh"
-fileListPath = "C:/Users/GM/Documents/local_dev/help-me-convert/temp/fileList.txt"
-userDomainName = "gm"
-emojis = ""
-
 # Common file paths
 ingestSourcesPath = "models/raw/_sources/_ingest_stage_sources.yml"
 lakeSourcesPath = "models/raw/_sources/_lake_sources.yml"
 hanaModelsPath = "models/raw/hana_s4_ppf/_models.yml"
 diceModelsPath = "models/raw/dice_sources/_models.yml"
 
+# Define Values
+baseCommitHash = ""
+fromBranch = ""
+toBranchSuffix = ""
+datT = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations"
+datTr = "C:/Users/GM/Documents/GitHub/2763-entdatawh/data-at-tyson-transformations-ref"
+commandPath = "C:/Users/GM/Documents/local_dev/help-me-convert/temp/rebase.sh"
+fileListPath = "C:/Users/GM/Documents/local_dev/help-me-convert/temp/fileList.txt"
+userDomainName = "gm"
+
 
 # Function definitions
+def runDIffFileScript():
+    command = f"""cd {datT}
+git checkout main
+git pull
+git checkout -b {userDomainName}-{toBranchSuffix}
+
+cd {datTr}
+git checkout main
+git pull
+git checkout {fromBranch}
+
+git diff {baseCommitHash} {fromBranch} --name-only > {fileListPath}
+"""
+    print("Running diff scripts")
+    writeToFile(commandPath, command)
+    runScript()
+    print("Script complete")
+
+
 def writeToFile(filename: str, content: str):
     print(f"Writing to {filename}")
     f = open(filename, "w", encoding="utf-8")
@@ -48,19 +66,6 @@ def readYMLFile(filename: str):
     with open(filename) as f:
         data = yaml.load(f, Loader=yaml.FullLoader)
     return data
-
-
-def runDIffFileScript():
-    command = f"""cd {datTr}
-git checkout main
-git pull
-git checkout {fromBranch}
-git diff {baseCommitHash} {fromBranch} --name-only > {fileListPath}
-"""
-    print("Running diff scripts")
-    writeToFile(commandPath, command)
-    runScript()
-    print("Script complete")
 
 
 def getDiffFilesList() -> list[str]:
