@@ -326,16 +326,25 @@ while True:
     toBranchSuffix = input("Enter to Branch Suffix: ")
     print("Getting file diffs")
     runDIffFileScript()
-    pathsList = getDiffFilesList()
-    ingestExist = isIngestPathIncluded(pathsList)
-    lakeExist = isLakePathIncluded(pathsList)
-    print("Copying files over")
-    filesToCopy = getFileToCopy(pathsList)
-    copyFilesOver(filesToCopy)
-    if ingestExist:
-        print("Copying Ingest Changes over")
-        copyIngestChanges()
-    if lakeExist:
-        print("Copying Datalake Changes over")
-        copyLakeChanges()
-    print(f"Rebasing {fromBranch} changes done")
+    go = input(
+        """Can i go ahead?
+y - Yes (default)
+n - No
+So what say: """
+    )
+    if go == "n":
+        print("Okay Existing")
+    else:
+        pathsList = getDiffFilesList()
+        ingestExist = isIngestPathIncluded(pathsList)
+        lakeExist = isLakePathIncluded(pathsList)
+        print("Copying files over")
+        filesToCopy = getFileToCopy(pathsList)
+        copyFilesOver(filesToCopy)
+        if ingestExist:
+            print("Copying Ingest Changes over")
+            copyIngestChanges()
+        if lakeExist:
+            print("Copying Datalake Changes over")
+            copyLakeChanges()
+        print(f"Rebasing {fromBranch} changes done")

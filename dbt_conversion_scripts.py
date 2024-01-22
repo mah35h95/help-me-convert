@@ -357,9 +357,11 @@ from {{{{ source('ingest_stage_hana_s4_ppf', '{ref}') }}}}
 
 {{% if is_incremental() %}}
     {{% set min_max_timestamp_query_result = get_incremental_timestamp('recordstamp', '120') %}} 
+    {{% if min_max_timestamp_query_result.min != None %}}
     for SYSTEM_TIME as of TIMESTAMP_MILLIS(UNIX_MILLIS(TIMESTAMP '{{{{min_max_timestamp_query_result.max}}}}'))
     -- this filter will only be applied on an incremental run
     where recordstamp >= '{{{{ min_max_timestamp_query_result.min }}}}' and recordstamp < '{{{{min_max_timestamp_query_result.max}}}}'
+    {{% endif %}}
 {{% endif %}}
 
 QUALIFY ROW_NUMBER() OVER (PARTITION BY {partitionPKs} ORDER BY recordstamp DESC, operation_rank ASC) = 1 
@@ -398,9 +400,11 @@ from {{{{ source('{schemaName}', '{ref}_change_hist') }}}}
 
 {{% if is_incremental() %}}
     {{% set min_max_timestamp_query_result = get_incremental_timestamp('DICE_CHANGE_SOURCE_WATERMARK', '120') %}} 
+    {{% if min_max_timestamp_query_result.min != None %}}
     for SYSTEM_TIME as of TIMESTAMP_MILLIS(UNIX_MILLIS(TIMESTAMP '{{{{min_max_timestamp_query_result.max}}}}'))
     -- this filter will only be applied on an incremental run
     where DICE_CHANGE_SOURCE_WATERMARK >= '{{{{ min_max_timestamp_query_result.min }}}}' and DICE_CHANGE_SOURCE_WATERMARK < '{{{{min_max_timestamp_query_result.max}}}}'
+    {{% endif %}}
 {{% endif %}}
 
 QUALIFY ROW_NUMBER() OVER (PARTITION BY <TODO: ADD Primary Keys> ORDER BY DICE_CHANGE_SOURCE_WATERMARK DESC, operation_rank ASC) = 1 
@@ -553,10 +557,12 @@ def convertSourcesToRefs(filename: str, sources: list[str]):
 def addIncrementalLine(filename: str):
     fromStr = """-- this filter will only be applied on an incremental run
 """
-    toStr = """-- this filter will only be applied on an incremental run
+    toStr = """{% if min_max_cdc_timestamp.min != None %}
+        -- this filter will only be applied on an incremental run
         where -- and
         recordstamp > '{{ min_max_cdc_timestamp.min }}' and recordstamp <= '{{min_max_cdc_timestamp.max}}'
-        -- DICE_CHANGE_SOURCE_WATERMARK > '{{ min_max_cdc_timestamp.min }}' and DICE_CHANGE_SOURCE_WATERMARK <= '{{min_max_cdc_timestamp.max}}'"""
+        -- DICE_CHANGE_SOURCE_WATERMARK > '{{ min_max_cdc_timestamp.min }}' and DICE_CHANGE_SOURCE_WATERMARK <= '{{min_max_cdc_timestamp.max}}'
+        {% endif %}"""
     sqlData = readFile(filename)
     sqlData = sqlData.replace(fromStr, toStr)
     writeToFile(filename, sqlData)
