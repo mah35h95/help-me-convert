@@ -568,6 +568,29 @@ def addIncrementalLine(filename: str):
     writeToFile(filename, sqlData)
 
 
+def removeIncrementalLine(filename: str):
+    fromStr = """{% if is_incremental() %}
+        {% set min_max_cdc_timestamp = get_incremental_timestamp('cdc_timestamp') %} 
+        -- this filter will only be applied on an incremental run
+
+    {% else %}
+        
+    {% endif %}"""
+    toStr = ""
+    sqlData = readFile(filename)
+    sqlData = sqlData.replace(fromStr, toStr)
+    writeToFile(filename, sqlData)
+
+
+def removeIncrementalPredicate(filename: str):
+    fromStr = """incremental_predicates  =   ["dynamic_timestamp_range", "cdc_timestamp"],
+            """
+    toStr = ""
+    sqlData = readFile(filename)
+    sqlData = sqlData.replace(fromStr, toStr)
+    writeToFile(filename, sqlData)
+
+
 def addCdcColumns(filename: str):
     fromStr = "current_timestamp() as metadata_inserted_timestamp"
     toStr = """cdc_operation_type -- operation_flag/DICE_CHANGE_INDICATOR       as cdc_operation_type
@@ -654,7 +677,9 @@ git commit -m "Adding in files for {table_name} {emojis}"
     createSourceFiles(sources)
     convertSourcesToRefs(fileZeroPath, sources)
 
-    addIncrementalLine(fileZeroPath)
+    # addIncrementalLine(fileZeroPath)
+    removeIncrementalLine(fileZeroPath)
+    removeIncrementalPredicate(fileZeroPath)
     addCdcColumns(fileZeroPath)
 
     fileZeroModelPath = (
@@ -695,7 +720,9 @@ git commit -m "Adding in files for {table_name} {emojis}"
     createSourceFiles(sources)
     convertSourcesToRefs(martPath, sources)
 
-    addIncrementalLine(martPath)
+    # addIncrementalLine(martPath)
+    removeIncrementalLine(martPath)
+    removeIncrementalPredicate(martPath)
     addCdcColumns(martPath)
 
     martModelPath = f"{datT}/models/marts/{layer}/ppf/{table_name}/_models.yml"
@@ -743,7 +770,9 @@ git commit -m "Adding in files for {table_name} {emojis}"
     createSourceFiles(sources)
     convertSourcesToRefs(stgPath, sources)
 
-    addIncrementalLine(stgPath)
+    # addIncrementalLine(stgPath)
+    removeIncrementalLine(stgPath)
+    removeIncrementalPredicate(stgPath)
     addCdcColumns(stgPath)
 
     stgModelPath = f"{datT}/models/staging/{layer}/ppf/stg_{table_name}/_models.yml"
