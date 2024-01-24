@@ -414,13 +414,16 @@ QUALIFY ROW_NUMBER() OVER (PARTITION BY <TODO: ADD Primary Keys> ORDER BY DICE_C
 
 
 def addNewLineToIngestSQLFile(ref: str):
-    folderPath = f"{datT}/models/raw/hana_s4_ppf"
-    filename = f"{folderPath}/{ref}_current_v1.sql"
+    try:
+        folderPath = f"{datT}/models/raw/hana_s4_ppf"
+        filename = f"{folderPath}/{ref}_current_v1.sql"
 
-    sqlData = readFile(filename)
-    sqlData = f"{sqlData}\n\n"
+        sqlData = readFile(filename)
+        sqlData = f"{sqlData}\n\n"
 
-    writeToFile(filename, sqlData)
+        writeToFile(filename, sqlData)
+    except:
+        print(f"{ref} could not be found")
 
 
 def createIngestRefFiles(ref: str, filename: str, name: str, tableKeys: str):
@@ -483,9 +486,9 @@ def createDatalakeRefFiles(
         errPeriod,
         loaded_at_field,
     )
-    tableName = f"{ref}_current"
-    addNewTableToModelYML(folderPath, tableName, tableKeys)
-    createDatalakeSQLFiles(folderPath, ref, schemaName)
+    # tableName = f"{ref}_current"
+    # addNewTableToModelYML(folderPath, tableName, tableKeys)
+    # createDatalakeSQLFiles(folderPath, ref, schemaName)
 
 
 def createRefFiles(refs: list[str]):
@@ -520,7 +523,8 @@ def createRefFiles(refs: list[str]):
                     filename = f"{datT}/models/raw/_sources/_lake_sources.yml"
                     name = schemaName
                     if isTableInYML(filename, name, changeHistName):
-                        addNewLineToDatalakeSQLFile(ref)
+                        # addNewLineToDatalakeSQLFile(ref)
+                        pass
                     else:
                         createDatalakeRefFiles(ref, schemaName, filename, name, "")
 
@@ -536,7 +540,8 @@ def createSourceFiles(sources: list[str]):
         name = schemaName
         changeHistName = f"{ref}_change_hist"
         if isTableInYML(filename, name, changeHistName):
-            addNewLineToDatalakeSQLFile(ref)
+            # addNewLineToDatalakeSQLFile(ref)
+            pass
         else:
             createDatalakeRefFiles(ref, schemaName, filename, name, "")
 
@@ -675,7 +680,7 @@ git commit -m "Adding in files for {table_name} {emojis}"
 
     sources = readBetweenTheLine(fileZero, "{{ source(", ") }}")
     createSourceFiles(sources)
-    convertSourcesToRefs(fileZeroPath, sources)
+    # convertSourcesToRefs(fileZeroPath, sources)
 
     # addIncrementalLine(fileZeroPath)
     removeIncrementalLine(fileZeroPath)
@@ -718,7 +723,7 @@ git commit -m "Adding in files for {table_name} {emojis}"
 
     sources = readBetweenTheLine(martFile, "{{ source(", ") }}")
     createSourceFiles(sources)
-    convertSourcesToRefs(martPath, sources)
+    # convertSourcesToRefs(martPath, sources)
 
     # addIncrementalLine(martPath)
     removeIncrementalLine(martPath)
@@ -768,7 +773,7 @@ git commit -m "Adding in files for {table_name} {emojis}"
 
     sources = readBetweenTheLine(stgFile, "{{ source(", ") }}")
     createSourceFiles(sources)
-    convertSourcesToRefs(stgPath, sources)
+    # convertSourcesToRefs(stgPath, sources)
 
     # addIncrementalLine(stgPath)
     removeIncrementalLine(stgPath)
