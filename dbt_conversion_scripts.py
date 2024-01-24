@@ -473,9 +473,9 @@ def createDatalakeRefFiles(
     errCount = 48
     errPeriod = "hour"
     loaded_at_field = "dice_change_source_watermark"
-    changeHistName = f"{ref}_change_hist"
+    currentName = f"{ref}_current"
     addNewTableToSourceYML(
-        changeHistName,
+        currentName,
         filename,
         name,
         database,
