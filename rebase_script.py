@@ -99,8 +99,8 @@ def getFileToCopy(pathsList: list[str]) -> list[str]:
     for path in pathsList:
         if (
             path != ""
-            and path != "models/raw/dice_sources/_models.yml"
             and path != "models/raw/hana_s4_ppf/_models.yml"
+            and not path.__contains__("models/raw/dice_sources/")
             and not path.__contains__("models/raw/_sources/")
         ):
             copyList.append(path)
@@ -299,10 +299,10 @@ def createDatalakeRefFiles(ref: str, schemaName: str, filename: str, name: str):
         loaded_at_field,
     )
 
-    if ref.__contains__("_change_hist"):
-        refClean = removeDiceTableSuffix(ref)
-        tableName = f"{refClean}_current"
-        addNewTableToModelYML(folderPath, tableName, diceModelsPath)
+    # if ref.__contains__("_change_hist"):
+    #     refClean = removeDiceTableSuffix(ref)
+    #     tableName = f"{refClean}_current"
+    #     addNewTableToModelYML(folderPath, tableName, diceModelsPath)
 
 
 def copyLakeChanges():
