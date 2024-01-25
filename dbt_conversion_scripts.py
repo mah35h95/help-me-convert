@@ -518,11 +518,11 @@ def createRefFiles(refs: list[str]):
                     else:
                         createIngestRefFiles(ref, filename, name, "")
                 else:
-                    changeHistName = f"{ref}_change_hist"
-                    schemaName = input(f"Enter the schema name for {changeHistName}: ")
+                    currentName = f"{ref}_current"
+                    schemaName = input(f"Enter the schema name for {currentName}: ")
                     filename = f"{datT}/models/raw/_sources/_lake_sources.yml"
                     name = schemaName
-                    if isTableInYML(filename, name, changeHistName):
+                    if isTableInYML(filename, name, currentName):
                         # addNewLineToDatalakeSQLFile(ref)
                         pass
                     else:
