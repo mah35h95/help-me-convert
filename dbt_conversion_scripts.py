@@ -538,8 +538,8 @@ def createSourceFiles(sources: list[str]):
         ref = removeDiceTableSuffix(sourceSplit[1])
         filename = f"{datT}/models/raw/_sources/_lake_sources.yml"
         name = schemaName
-        changeHistName = f"{ref}_change_hist"
-        if isTableInYML(filename, name, changeHistName):
+        currentName = f"{ref}_current"
+        if isTableInYML(filename, name, currentName):
             # addNewLineToDatalakeSQLFile(ref)
             pass
         else:
