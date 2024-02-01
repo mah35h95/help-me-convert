@@ -646,6 +646,29 @@ def addMetaTimestamp(filename: str):
     writeToFile(filename, ymlData)
 
 
+def createLatestVersion(table_name: str, basePath: str):
+    latestVersionSQL = (
+        """{{
+        config(
+            labels  =  {'model' : '"""
+        + table_name
+        + """_t1'},
+            alias   = '"""
+        + table_name
+        + """_t1',
+            materialization = 'view'
+        )
+    }}
+    
+    select * from {{ ref('"""
+        + table_name
+        + """') }}
+"""
+    )
+    filename = f"{basePath}/{table_name}_latest_version.sql"
+    writeToFile(filename, latestVersionSQL)
+
+
 def do_type0(table_name: str, layer: str):
     modelLayer = ""
     if isStage(table_name):
@@ -684,13 +707,22 @@ git commit -m "Adding in files for {table_name} {emojis}"
 
     # addIncrementalLine(fileZeroPath)
     removeIncrementalLine(fileZeroPath)
-    removeIncrementalPredicate(fileZeroPath)
-    addCdcColumns(fileZeroPath)
+
+    # removeIncrementalPredicate(fileZeroPath)
+    # addCdcColumns(fileZeroPath)
+
+    fileZeroBasePath = f"{datT}/models/{modelLayer}/{layer}/ppf/{table_name}"
+    createLatestVersion(table_name, fileZeroBasePath)
 
     fileZeroModelPath = (
         f"{datT}/models/{modelLayer}/{layer}/ppf/{table_name}/_models.yml"
     )
-    addCdcOperationType(fileZeroModelPath)
+    if table_name.startswith("md_"):
+        removeCdcTimestamp(fileZeroModelPath)
+    if table_name.startswith("dim_"):
+        removeCdcTimestamp(fileZeroModelPath)
+    else:
+        addCdcOperationType(fileZeroModelPath)
 
 
 def do_type1(table_name: str, layer: str):
