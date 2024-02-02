@@ -31,6 +31,9 @@ git checkout {userDomainName}-{toBranchSuffix} || git checkout -b {userDomainNam
 cd {datTr}
 git checkout main
 git pull
+
+git branch | grep -v "main" | xargs git branch -D 
+
 git checkout {fromBranch}
 
 git diff {baseCommitHash} {fromBranch} --name-only > {fileListPath}
