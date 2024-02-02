@@ -695,6 +695,7 @@ def legacyReplaceHubToAnalytics(table_name: str, legacyPath: str):
 
 def replaceRefsWithLegacy(filename: str, refs: list[str]):
     for ref in refs:
+        ref = ref.replace("'", "")
         if isHub(ref):
             fromStr = f"{{{{ ref('{ref}') }}}}"
             legacyRef = f"legacy_{ref.removesuffix('_t2')}"
@@ -840,7 +841,7 @@ git commit -m "Adding in files for {table_name} {emojis}"
     # addCdcOperationType(fileZeroModelPath)
 
     if isAnalytics(table_name):
-        replaceRefsWithLegacy(fileZero, refs)
+        replaceRefsWithLegacy(fileZeroPath, refs)
 
 
 def do_type1(table_name: str, layer: str):
@@ -891,7 +892,7 @@ git commit -m "Adding in files for {table_name} {emojis}"
     removeCdcTimestamp(legacyModelPath)
 
     if isAnalytics(table_name):
-        replaceRefsWithLegacy(martFile, refs)
+        replaceRefsWithLegacy(martPath, refs)
         legacyPath = f"{datT}/models/marts/{layer}/ppf/legacy_{table_name}"
         legacyReplaceHubToAnalytics(table_name, legacyPath)
 
@@ -960,7 +961,7 @@ git commit -m "Adding in files for {table_name} {emojis}"
     addCheckCols(snapshotsFile, stgModelPath)
 
     if isAnalytics(table_name):
-        replaceRefsWithLegacy(stgFile, refs)
+        replaceRefsWithLegacy(stgPath, refs)
         legacyPath = f"{datT}/models/marts/{layer}/ppf/legacy_{table_name}"
         legacyReplaceHubToAnalytics(table_name, legacyPath)
 
