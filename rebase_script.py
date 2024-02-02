@@ -32,7 +32,7 @@ cd {datTr}
 git checkout main
 git pull
 
-git branch | grep -v "main" | xargs git branch -D 
+git branch | grep -v "main" | grep -v "utf_baseline_fix" | xargs git branch -D
 
 git checkout {fromBranch}
 
