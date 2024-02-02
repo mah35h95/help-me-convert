@@ -1,26 +1,3 @@
-"""
-Frequently copied lines
-
-,         operation_flag
-    ,         recordstamp
-
-,         cdc_operation_type
-    ,         cdc_timestamp
-
-,         operation_flag    as cdc_operation_type
-    ,         recordstamp       as cdc_timestamp
-
-,	    current_timestamp() as metadata_inserted_timestamp
-    ,	    current_timestamp() as metadata_updated_timestamp
-
-- name: cdc_operation_type
-        data_type: string
-      - name: cdc_timestamp
-        data_type: timestamp
-
-where recordstamp > '{{ min_max_cdc_timestamp.min }}' and recordstamp <= '{{min_max_cdc_timestamp.max}}'
-
-"""
 # Imports
 import pandas as pd
 import subprocess
@@ -573,7 +550,7 @@ def addIncrementalLine(filename: str):
     writeToFile(filename, sqlData)
 
 
-def removeIncrementalLine(filename: str):
+def removeIncrementalLine(table_name: str, filename: str):
     fromStr = """{% if is_incremental() %}
         {% set min_max_cdc_timestamp = get_incremental_timestamp('cdc_timestamp') %} 
         -- this filter will only be applied on an incremental run
@@ -582,6 +559,8 @@ def removeIncrementalLine(filename: str):
         
     {% endif %}"""
     toStr = ""
+    if table_name.startswith("md_"):
+        toStr = "-- WHERE operation_flag != 'D'"
     sqlData = readFile(filename)
     sqlData = sqlData.replace(fromStr, toStr)
     writeToFile(filename, sqlData)
@@ -594,6 +573,135 @@ def removeIncrementalPredicate(filename: str):
     sqlData = readFile(filename)
     sqlData = sqlData.replace(fromStr, toStr)
     writeToFile(filename, sqlData)
+
+
+def removeIncrementalStrategy(filename: str):
+    fromStr = """incremental_strategy    =   'merge',
+            """
+    toStr = ""
+    sqlData = readFile(filename)
+    sqlData = sqlData.replace(fromStr, toStr)
+    writeToFile(filename, sqlData)
+
+
+def removeByIesCdc(filename: str):
+    fromStr = """cluster_by              =   ['cdc_timestamp'],  
+            partition_by            =   {
+                                        "field": "cdc_timestamp",
+                                        "data_type": "timestamp",
+                                        "granularity": "day"
+                                    }"""
+    toStr = ""
+    sqlData = readFile(filename)
+    sqlData = sqlData.replace(fromStr, toStr)
+    writeToFile(filename, sqlData)
+
+
+def removeByIesDbt(filename: str):
+    fromStr = """cluster_by              = ['dbt_updated_at'],  
+        partition_by            = {
+                                    "field": "dbt_updated_at",
+                                    "data_type": "timestamp",
+                                    "granularity": "day"
+                                  }"""
+    toStr = ""
+    sqlData = readFile(filename)
+    sqlData = sqlData.replace(fromStr, toStr)
+    writeToFile(filename, sqlData)
+
+
+def removeCdcExcept(filename: str):
+    fromStr = "except(cdc_operation_type)"
+    toStr = ""
+    sqlData = readFile(filename)
+    sqlData = sqlData.replace(fromStr, toStr)
+    writeToFile(filename, sqlData)
+
+
+def removeCdcWhere(filename: str):
+    fromStr = "where cdc_operation_type != 'D'"
+    toStr = ""
+    sqlData = readFile(filename)
+    sqlData = sqlData.replace(fromStr, toStr)
+    writeToFile(filename, sqlData)
+
+
+def removeUpdatedAt(filename: str):
+    fromStr = """updated_at              = 'cdc_timestamp',
+        """
+    toStr = ""
+    sqlData = readFile(filename)
+    sqlData = sqlData.replace(fromStr, toStr)
+    writeToFile(filename, sqlData)
+
+
+def updateMaterialized(filename: str):
+    fromStr = "materialized            =   'incremental',"
+    toStr = "materialized            =   'table',"
+    sqlData = readFile(filename)
+    sqlData = sqlData.replace(fromStr, toStr)
+    writeToFile(filename, sqlData)
+
+
+def updateStrategy(filename: str):
+    fromStr = "strategy                = 'timestamp',"
+    toStr = "strategy                = 'check',"
+    sqlData = readFile(filename)
+    sqlData = sqlData.replace(fromStr, toStr)
+    writeToFile(filename, sqlData)
+
+
+def getCheckCols(baseModelYml: str) -> list[str]:
+    modelFile = readYMLFile(baseModelYml)
+    checkCols: list[str] = []
+    for col in modelFile["models"][0]["columns"]:
+        if (
+            col["name"] != "cdc_timestamp"
+            and col["name"] != "surrogate_key"
+            and col["name"] != "metadata_inserted_timestamp"
+            and col["name"] != "metadata_updated_timestamp"
+        ):
+            checkCols.append(col["name"])
+    return checkCols
+
+
+def addCheckCols(filename: str, baseModelYml: str):
+    checkCols = getCheckCols(baseModelYml)
+    fromStr = "invalidate_hard_deletes = false,"
+    toStr = """invalidate_hard_deletes = false,
+        check_cols              = []"""
+    if len(checkCols) > 0:
+        toStr = f"""invalidate_hard_deletes = false,
+        check_cols              = ['{"', '".join(checkCols)}']"""
+    sqlData = readFile(filename)
+    sqlData = sqlData.replace(fromStr, toStr)
+    writeToFile(filename, sqlData)
+
+
+def replaceHubToAnalytics(filename: str):
+    fromStr = "_hub_"
+    toStr = "_analytics_"
+    fileData = readFile(filename)
+    fileData = fileData.replace(fromStr, toStr)
+    writeToFile(filename, fileData)
+
+
+def legacyReplaceHubToAnalytics(table_name: str, legacyPath: str):
+    model = f"{legacyPath}/_models.yml"
+    replaceHubToAnalytics(model)
+    sql = f"{legacyPath}/legacy_{table_name}_v1.sql"
+    replaceHubToAnalytics(sql)
+
+
+def replaceRefsWithLegacy(filename: str, refs: list[str]):
+    for ref in refs:
+        if isHub(ref):
+            fromStr = f"{{{{ ref('{ref}') }}}}"
+            legacyRef = f"legacy_{ref.removesuffix('_t2')}"
+            toStr = f"{{{{ ref('{legacyRef}') }}}}"
+            sqlData = readFile(filename)
+            sqlData = sqlData.replace(fromStr, toStr)
+            writeToFile(filename, sqlData)
 
 
 def addCdcColumns(filename: str):
@@ -628,7 +736,7 @@ def removeCdcTimestamp(filename: str):
     writeToFile(filename, ymlData)
 
 
-def addMetaTimestamp(filename: str):
+def addMetaTimestampToUniqueTest(filename: str):
     modelData = readYMLFile(filename)
     columnName = modelData["models"][0]["tests"][0]["unique"]["column_name"]
     fromStr = f"""tests:
@@ -638,9 +746,21 @@ def addMetaTimestamp(filename: str):
     toStr = f"""tests:
       - unique:
           column_name: "{columnName} || '-' || metadata_hub_begin_timestamp || '-' || metadata_hub_end_timestamp"
-      - not_null:
-          column_name: "{columnName} || '-' || metadata_hub_begin_timestamp"
     """
+    ymlData = readFile(filename)
+    ymlData = ymlData.replace(fromStr, toStr)
+    writeToFile(filename, ymlData)
+
+
+def addMetaTimestampNullTest(filename: str):
+    fromStr = f"""- name: metadata_hub_begin_timestamp
+        data_type: timestamp
+      """
+    toStr = f"""- name: metadata_hub_begin_timestamp
+        data_type: timestamp
+        tests:
+          - not_null
+      """
     ymlData = readFile(filename)
     ymlData = ymlData.replace(fromStr, toStr)
     writeToFile(filename, ymlData)
@@ -706,8 +826,7 @@ git commit -m "Adding in files for {table_name} {emojis}"
     # convertSourcesToRefs(fileZeroPath, sources)
 
     # addIncrementalLine(fileZeroPath)
-    removeIncrementalLine(fileZeroPath)
-
+    removeIncrementalLine(table_name, fileZeroPath)
     # removeIncrementalPredicate(fileZeroPath)
     # addCdcColumns(fileZeroPath)
 
@@ -717,12 +836,11 @@ git commit -m "Adding in files for {table_name} {emojis}"
     fileZeroModelPath = (
         f"{datT}/models/{modelLayer}/{layer}/ppf/{table_name}/_models.yml"
     )
-    if table_name.startswith("md_"):
-        removeCdcTimestamp(fileZeroModelPath)
-    if table_name.startswith("dim_"):
-        removeCdcTimestamp(fileZeroModelPath)
-    else:
-        addCdcOperationType(fileZeroModelPath)
+    removeCdcTimestamp(fileZeroModelPath)
+    # addCdcOperationType(fileZeroModelPath)
+
+    if isAnalytics(table_name):
+        replaceRefsWithLegacy(fileZero, refs)
 
 
 def do_type1(table_name: str, layer: str):
@@ -758,15 +876,24 @@ git commit -m "Adding in files for {table_name} {emojis}"
     # convertSourcesToRefs(martPath, sources)
 
     # addIncrementalLine(martPath)
-    removeIncrementalLine(martPath)
+    removeIncrementalLine(table_name, martPath)
     removeIncrementalPredicate(martPath)
-    addCdcColumns(martPath)
+    removeIncrementalStrategy(martPath)
+    removeByIesCdc(martPath)
+    updateMaterialized(martPath)
+    # addCdcColumns(martPath)
 
     martModelPath = f"{datT}/models/marts/{layer}/ppf/{table_name}/_models.yml"
-    addCdcOperationType(martModelPath)
+    removeCdcTimestamp(martModelPath)
+    # addCdcOperationType(martModelPath)
 
     legacyModelPath = f"{datT}/models/marts/{layer}/ppf/legacy_{table_name}/_models.yml"
     removeCdcTimestamp(legacyModelPath)
+
+    if isAnalytics(table_name):
+        replaceRefsWithLegacy(martFile, refs)
+        legacyPath = f"{datT}/models/marts/{layer}/ppf/legacy_{table_name}"
+        legacyReplaceHubToAnalytics(table_name, legacyPath)
 
 
 def do_type2(table_name: str, layer: str):
@@ -808,16 +935,34 @@ git commit -m "Adding in files for {table_name} {emojis}"
     # convertSourcesToRefs(stgPath, sources)
 
     # addIncrementalLine(stgPath)
-    removeIncrementalLine(stgPath)
+    removeIncrementalLine(table_name, stgPath)
     removeIncrementalPredicate(stgPath)
-    addCdcColumns(stgPath)
+    removeIncrementalStrategy(stgPath)
+    removeByIesCdc(stgPath)
+    updateMaterialized(stgPath)
+    # addCdcColumns(stgPath)
 
     stgModelPath = f"{datT}/models/staging/{layer}/ppf/stg_{table_name}/_models.yml"
-    addCdcOperationType(stgModelPath)
+    removeCdcTimestamp(stgModelPath)
+    # addCdcOperationType(stgModelPath)
 
     legacyModelPath = f"{datT}/models/marts/{layer}/ppf/legacy_{table_name}/_models.yml"
     removeCdcTimestamp(legacyModelPath)
-    addMetaTimestamp(legacyModelPath)
+    addMetaTimestampToUniqueTest(legacyModelPath)
+    addMetaTimestampNullTest(legacyModelPath)
+
+    snapshotsFile = f"{datT}/snapshots/marts/{layer}/ppf/{table_name}/{table_name}.sql"
+    removeUpdatedAt(snapshotsFile)
+    removeByIesDbt(snapshotsFile)
+    removeCdcExcept(snapshotsFile)
+    removeCdcWhere(snapshotsFile)
+    updateStrategy(snapshotsFile)
+    addCheckCols(snapshotsFile, stgModelPath)
+
+    if isAnalytics(table_name):
+        replaceRefsWithLegacy(stgFile, refs)
+        legacyPath = f"{datT}/models/marts/{layer}/ppf/legacy_{table_name}"
+        legacyReplaceHubToAnalytics(table_name, legacyPath)
 
 
 def doType(table_name: str, type: str, layer: str):
