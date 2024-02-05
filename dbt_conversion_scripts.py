@@ -33,8 +33,10 @@ git checkout {userDomainName}-{table_name} || git checkout -b {userDomainName}-{
 def writeToFile(filename: str, content: str):
     f = open(filename, "w", encoding="utf-8")
     if filename.__contains__(".sh"):
-        f.write("#!/bin/bash\n")
+        f.write("#!/bin/bash\nset +o history #set -o history\n")
     f.write(content)
+    if filename.__contains__(".sh"):
+        f.write("\nset -o history\n")
     f.close()
 
 
